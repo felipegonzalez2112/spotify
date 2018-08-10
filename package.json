@@ -1,0 +1,22 @@
+{
+  "name": "spotify",
+  "version": "1.0.0",
+  "description": "Projecto ejemplo",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://felipegonzalez2112@github.com/felipegonzalez2112/spotify.git"
+  },
+  "author": "Felipe Gonzalez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/felipegonzalez2112/spotify/issues"
+  },
+  "homepage": "https://github.com/felipegonzalez2112/spotify#readme",
+  "devDependencies": {
+    "nodemon": "^1.18.3"
+  }
+}
