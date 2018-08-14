@@ -1,5 +1,5 @@
 var express = require('express');
-var request = require('request'); 
+var request = require('request');
 var app = express();
 var path = require('path');
 
@@ -15,104 +15,104 @@ app.use(express.static(path.join(__dirname, 'public'))); //  "public" off of cur
 app.use(cors());
 app.use(cookieParser());
 
+var LocalStorage = require('node-localstorage').LocalStorage,
+        localStorage = new LocalStorage('./scratch');
+
 // viewed at http://localhost:3000
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
     res.sendFile(path.join('index.html'));
 });
 
-var generateRandomString = function(length) {
-  var text = '';
-  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+var generateRandomString = function (length) {
+    var text = '';
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-  for (var i = 0; i < length; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
+    for (var i = 0; i < length; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
 };
 
 var stateKey = 'spotify_auth_state';
 
-app.get('/login', function(req, res) {
-  console.log('Redirigiendo al login')
-  var state = generateRandomString(16);
-  res.cookie(stateKey, state);
+app.get('/login', function (req, res) {
+    var state = generateRandomString(16);
+    res.cookie(stateKey, state);
 
-  // your application requests authorization
-  var scope = 'user-read-private user-read-email';
-  res.redirect('https://accounts.spotify.com/authorize?' +
-    querystring.stringify({
-      response_type: 'code',
-      client_id: client_id,
-      scope: scope,
-      redirect_uri: redirect_uri,
-      state: state
-    }));
+    // your application requests authorization
+    var scope = 'user-read-private user-read-email';
+    res.redirect('https://accounts.spotify.com/authorize?' +
+            querystring.stringify({
+                response_type: 'code',
+                client_id: client_id,
+                scope: scope,
+                redirect_uri: redirect_uri,
+                state: state
+            }));
 });
 
-app.get('/callback', function(req, res) {
+app.get('/callback', function (req, res) {
 
-  // your application requests refresh and access tokens
-  // after checking the state parameter
+    // your application requests refresh and access tokens
+    // after checking the state parameter
 
-  var code = req.query.code || null;
-  var state = req.query.state || null;
-  var storedState = req.cookies ? req.cookies[stateKey] : null;
+    var code = req.query.code || null;
+    var state = req.query.state || null;
+    var storedState = req.cookies ? req.cookies[stateKey] : null;
 
-  if (state === null || state !== storedState) {
-    res.redirect('/#' +
-      querystring.stringify({
-        error: 'state_mismatch'
-      }));
-  } else {
-    res.clearCookie(stateKey);
-    var authOptions = {
-      url: 'https://accounts.spotify.com/api/token',
-      form: {
-        code: code,
-        redirect_uri: redirect_uri,
-        grant_type: 'authorization_code'
-      },
-      headers: {
-        'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
-      },
-      json: true
-    };
-
-    request.post(authOptions, function(error, response, body) {
-      if (!error && response.statusCode === 200) {
-
-        var access_token = body.access_token,
-            refresh_token = body.refresh_token;
-
-        var options = {
-          url: 'https://api.spotify.com/v1/me',
-          headers: { 'Authorization': 'Bearer ' + access_token },
-          json: true
+    if (state === null || state !== storedState) {
+        res.redirect('/#' +
+                querystring.stringify({
+                    error: 'state_mismatch'
+                }));
+    } else {
+        res.clearCookie(stateKey);
+        var authOptions = {
+            url: 'https://accounts.spotify.com/api/token',
+            form: {
+                code: code,
+                redirect_uri: redirect_uri,
+                grant_type: 'authorization_code'
+            },
+            headers: {
+                'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
+            },
+            json: true
         };
 
-        // use the access token to access the Spotify Web API
-        request.get(options, function(error, response, body) {
-          console.log(body);
-        });
+        request.post(authOptions, function (error, response, body) {
+            if (!error && response.statusCode === 200) {
 
-        // we can also pass the token to the browser to make requests from there
-        res.redirect('/#' +
-          querystring.stringify({
-            access_token: access_token,
-            refresh_token: refresh_token
-          }));
-      } else {
-        res.redirect('/#' +
-          querystring.stringify({
-            error: 'invalid_token'
-          }));
-      }
-    });
-  }
+                var access_token = body.access_token,
+                        refresh_token = body.refresh_token;
+
+                var options = {
+                    url: 'https://api.spotify.com/v1/me',
+                    headers: {'Authorization': 'Bearer ' + access_token},
+                    json: true
+                };
+
+                localStorage.setItem('pa_token', access_token);
+                localStorage.setItem('pa_refresh_token', refresh_token);
+
+                // we can also pass the token to the browser to make requests from there
+                res.redirect('/perfil');
+            } else {
+                res.redirect('/#' +
+                        querystring.stringify({
+                            error: 'invalid_token'
+                        }));
+            }
+        });
+    }
+});
+
+app.get('/perfil', function (req, res) {
+    res.sendFile(__dirname + path.join('/public/perfil.html'));
 });
 
 
 
 app.listen(3000, function () {
-  console.log('Levantando en el puerto 3000!');
+    console.log('Levantando en el puerto 3000!');
 });

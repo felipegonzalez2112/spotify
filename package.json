@@ -23,5 +23,8 @@
     "nodemon": "^1.18.3",
     "querystring": "^0.2.0",
     "request": "^2.87.0"
+  },
+  "dependencies": {
+    "node-localstorage": "^1.3.1"
   }
 }

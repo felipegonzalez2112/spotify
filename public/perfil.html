@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Spotify</title>
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        <style type="text/css">
+            #login, #loggedin {
+                display: none;
+            }
+            .text-overflow {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                width: 500px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <h1>Perfil de usuario</h1>
+        </div>
+    </body>
+    <script>
+
+        var perfil = (function () {
+
+            console.log(localStorage.getItem("pa_token"));
+
+        }())
+    </script>
+</html>
