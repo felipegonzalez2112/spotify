@@ -15,9 +15,6 @@ app.use(express.static(path.join(__dirname, 'public'))); //  "public" off of cur
 app.use(cors());
 app.use(cookieParser());
 
-var LocalStorage = require('node-localstorage').LocalStorage,
-        localStorage = new LocalStorage('./scratch');
-
 // viewed at http://localhost:3000
 app.get('/', function (req, res) {
     res.sendFile(path.join('index.html'));
@@ -91,9 +88,9 @@ app.get('/callback', function (req, res) {
                     headers: {'Authorization': 'Bearer ' + access_token},
                     json: true
                 };
-
-                localStorage.setItem('pa_token', access_token);
-                localStorage.setItem('pa_refresh_token', refresh_token);
+                
+                res.cookie('access_token',access_token);
+                res.cookie('refresh_token',refresh_token);
 
                 // we can also pass the token to the browser to make requests from there
                 res.redirect('/perfil');
